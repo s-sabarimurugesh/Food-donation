@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Second Helpings: Food Donation Connection Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F2F6F1;--surface:#fff;--ink:#12372A;--muted:#566B62;--line:#D3DED6;--accent:#F2C230;--accent-ink:#2B2200;--urgent:#C73A22;--ok:#1E7A4F;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1F19;--surface:#15302A;--ink:#EAF3EC;--muted:#9DB5A8;--line:#27463C;--accent:#F2C230;--accent-ink:#2B2200;--urgent:#FF7A60;--ok:#5FD39A}}
+:root[data-theme="dark"]{--bg:#0E1F19;--surface:#15302A;--ink:#EAF3EC;--muted:#9DB5A8;--line:#27463C;--accent:#F2C230;--accent-ink:#2B2200;--urgent:#FF7A60;--ok:#5FD39A}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+main{max-width:760px;margin:0 auto;padding:20px 16px 56px}
+h1{font-size:clamp(2rem,7vw,3.1rem);line-height:1.05;margin:8px 0 10px;font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.15rem;margin:0 0 12px;font-weight:600}
+.lede{color:var(--muted);max-width:52ch;margin:0 0 18px}
+.tally{display:flex;gap:10px;margin:0 0 22px}
+.tally div{flex:1;background:var(--ink);color:var(--bg);border-radius:14px;padding:12px 14px}
+.tally b{display:block;font-size:1.7rem;font-weight:800;line-height:1.1}
+.tally span{font-size:.85rem;opacity:.85}
+.tabs{display:flex;gap:6px;background:var(--line);padding:4px;border-radius:12px;margin-bottom:18px}
+.tabs button{flex:1;border:0;background:transparent;color:var(--ink);font:inherit;font-weight:600;padding:10px;border-radius:9px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:18px}
+label{display:block;font-weight:600;font-size:.92rem;margin:12px 0 4px}
+input,select{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.row{grid-template-columns:1fr}}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:11px 16px;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn[disabled]{opacity:.6;cursor:default}
+.submit{margin-top:16px;width:100%}
+.item{border-top:1px solid var(--line);padding:14px 0;display:flex;gap:12px;justify-content:space-between;align-items:flex-start}
+.item:first-child{border-top:0;padding-top:0}
+.item h3{margin:0 0 2px;font-size:1.02rem}
+.meta{color:var(--muted);font-size:.9rem}
+.tag{display:inline-block;font-size:.8rem;padding:1px 9px;border-radius:99px;border:1px solid var(--line);margin-right:4px}
+.left{font-weight:800}
+.left.urgent{color:var(--urgent)}
+.claimed{color:var(--ok);font-weight:600}
+.empty{color:var(--muted);margin:0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <h1>Surplus food in. Hungry neighbors fed.</h1>
+  <p class="lede">Post food you can’t use. Nearby shelters, kitchens and food banks that accept it see your listing right away and claim the pickup.</p>
+  <div class="tally" aria-live="polite">
+    <div><b id="tServ">0</b><span>servings rescued</span></div>
+    <div><b id="tOpen">0</b><span>listings waiting</span></div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tabD" aria-selected="true" aria-controls="pD">I have food</button>
+    <button role="tab" id="tabO" aria-selected="false" aria-controls="pO">I’m an organization</button>
+  </div>
+
+  <section id="pD" role="tabpanel" aria-labelledby="tabD">
+    <div class="panel">
+      <h2>Post surplus food</h2>
+      <form id="f" onsubmit="return false">
+        <label for="fItem">What is it?</label>
+        <input id="fItem" placeholder="e.g. 4 trays of vegetable biryani" maxlength="80">
+        <div class="row">
+          <div><label for="fCat">Type</label>
+            <select id="fCat"><option value="cooked">Cooked meals</option><option value="produce">Fresh produce</option><option value="bakery">Bread and bakery</option><option value="packaged">Packaged, sealed</option><option value="dairy">Dairy and chilled</option></select></div>
+          <div><label for="fQty">Servings</label><input id="fQty" type="number" min="1" max="2000" value="20"></div>
+        </div>
+        <div class="row">
+          <div><label for="fArea">Pickup area</label><select id="fArea"></select></div>
+          <div><label for="fHrs">Safe to collect for</label>
+            <select id="fHrs"><option value="1">1 hour</option><option value="2">2 hours</option><option value="4" selected>4 hours</option><option value="8">8 hours</option><option value="24">24 hours</option></select></div>
+        </div>
+        <label for="fName">Your name or business</label>
+        <input id="fName" placeholder="e.g. Marta’s Bakery" maxlength="50">
+        <button class="btn submit" id="fGo" type="button">Post food</button>
+        <p class="meta" id="fErr" role="alert" style="color:var(--urgent);margin:8px 0 0"></p>
+      </form>
+    </div>
+    <div class="panel" id="match" hidden>
+      <h2>Closest organizations that take this</h2>
+      <div id="matchList"></div>
+    </div>
+    <div class="panel">
+      <h2>Your listings</h2>
+      <div id="mine"></div>
+    </div>
+  </section>
+
+  <section id="pO" role="tabpanel" aria-labelledby="tabO" hidden>
+    <div class="panel">
+      <label for="oSel" style="margin-top:0">Your organization</label>
+      <select id="oSel"></select>
+      <p class="meta" id="oInfo" style="margin:8px 0 0"></p>
+    </div>
+    <div class="panel"><h2>Available near you</h2><div id="feed"></div></div>
+    <div class="panel"><h2>Claimed by you</h2><div id="done"></div></div>
+  </section>
+  <p class="meta">Sample organizations and listings are shown for demonstration.</p>
+</main>
+
+<script>
+var AREAS={"Northside":[0,4],"Riverside":[3,2],"Old Town":[1,0],"Eastgate":[5,3],"Hillcrest":[-2,2]};
+var CATS={cooked:"Cooked meals",produce:"Fresh produce",bakery:"Bread and bakery",packaged:"Packaged, sealed",dairy:"Dairy and chilled"};
+var ORGS=[
+ {id:"o1",name:"Hope Street Kitchen",area:"Old Town",takes:["cooked","produce","bakery"],note:"Serves about 150 hot meals a day"},
+ {id:"o2",name:"Riverside Food Bank",area:"Riverside",takes:["produce","packaged","dairy","bakery"],note:"Cold storage on site"},
+ {id:"o3",name:"Night Shelter Collective",area:"Northside",takes:["cooked","bakery","packaged"],note:"Dinner served at 7 pm"},
+ {id:"o4",name:"Eastgate Community Fridge",area:"Eastgate",takes:["produce","dairy","packaged","cooked"],note:"Open 24 hours, self-serve"},
+ {id:"o5",name:"Hillcrest Seniors Meals",area:"Hillcrest",takes:["cooked","produce","dairy"],note:"Delivers to 60 homes"}];
+var H=3600000,now=Date.now();
+var S={listings:[{id:"s1",item:"Sandwich platters left from a conference",cat:"packaged",qty:40,area:"Riverside",exp:now+1.5*H,who:"Harbor Events",status:"open",mine:false,by:null},
+ {id:"s2",item:"Crates of tomatoes and peppers",cat:"produce",qty:60,area:"Eastgate",exp:now+9*H,who:"Green Row Market",status:"open",mine:false,by:null},
+ {id:"s3",item:"Trays of baked pasta",cat:"cooked",qty:35,area:"Old Town",exp:now+3*H,who:"Luca’s Trattoria",status:"open",mine:false,by:null}],rescued:0,org:"o1"};
+var $=function(i){return document.getElementById(i)};
+try{var raw=localStorage.getItem("sh-state");if(raw){var p=JSON.parse(raw);if(p&&p.listings){S=p}}}catch(e){}
+function save(){try{localStorage.setItem("sh-state",JSON.stringify(S))}catch(e){}}
+function dist(a,b){var p=AREAS[a],q=AREAS[b];return Math.hypot(p[0]-q[0],p[1]-q[1])}
+function km(d){return d<0.5?"same area":d.toFixed(1)+" km away"}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function left(ms){var m=Math.round((ms-Date.now())/60000);if(m<=0)return["Expired",true];var h=Math.floor(m/60);return[(h?h+"h ":"")+(m%60)+"m left",m<90]}
+function org(id){return ORGS.filter(function(o){return o.id===id})[0]}
+function tag(c){return '<span class="tag">'+CATS[c]+'</span>'}
+
+var aSel=$("fArea"),oSel=$("oSel");
+Object.keys(AREAS).forEach(function(a){aSel.add(new Option(a,a))});
+ORGS.forEach(function(o){oSel.add(new Option(o.name+" ("+o.area+")",o.id))});
+oSel.value=S.org;
+
+function tab(which){var d=which==="D";$("pD").hidden=!d;$("pO").hidden=d;$("tabD").setAttribute("aria-selected",d);$("tabO").setAttribute("aria-selected",!d);render()}
+$("tabD").onclick=function(){tab("D")};$("tabO").onclick=function(){tab("O")};
+oSel.onchange=function(){S.org=oSel.value;save();render()};
+
+$("fGo").onclick=function(){
+ var item=$("fItem").value.trim(),who=$("fName").value.trim(),qty=parseInt($("fQty").value,10);
+ if(!item||!who||!(qty>0)){$("fErr").textContent="Add what the food is, a servings number and your name to post it.";return}
+ $("fErr").textContent="";
+ var l={id:"l"+Date.now(),item:item,cat:$("fCat").value,qty:qty,area:aSel.value,exp:Date.now()+parseInt($("fHrs").value,10)*H,who:who,status:"open",mine:true,by:null};
+ S.listings.unshift(l);save();
+ var m=ORGS.filter(function(o){return o.takes.indexOf(l.cat)>-1}).sort(function(a,b){return dist(l.area,a.area)-dist(l.area,b.area)}).slice(0,3);
+ $("matchList").innerHTML=m.length?m.map(function(o){return '<div class="item"><div><h3>'+esc(o.name)+'</h3><div class="meta">'+km(dist(l.area,o.area))+' · '+esc(o.note)+'</div></div><span class="claimed">Notified</span></div>'}).join(""):'<p class="empty">No organization nearby takes this type yet. Your listing stays visible.</p>';
+ $("match").hidden=false;$("fItem").value="";render();
+};
+
+function claim(id){S.listings.forEach(function(l){if(l.id===id&&l.status==="open"){l.status="claimed";l.by=S.org;S.rescued+=l.qty}});save();render()}
+
+function render(){
+ var open=S.listings.filter(function(l){return l.status==="open"&&l.exp>Date.now()});
+ $("tServ").textContent=S.rescued;$("tOpen").textContent=open.length;
+ var mine=S.listings.filter(function(l){return l.mine});
+ $("mine").innerHTML=mine.length?mine.map(function(l){var t=left(l.exp);var st=l.status==="claimed"?'<span class="claimed">Claimed by '+esc(org(l.by).name)+'</span>':'<span class="left'+(t[1]?' urgent':'')+'">'+t[0]+'</span>';
+  return '<div class="item"><div><h3>'+esc(l.item)+'</h3><div class="meta">'+tag(l.cat)+l.qty+' servings · '+esc(l.area)+'</div></div>'+st+'</div>'}).join(""):'<p class="empty">Nothing posted yet. Your listings appear here with their status.</p>';
+ var o=org(S.org);$("oInfo").textContent="Takes: "+o.takes.map(function(c){return CATS[c].toLowerCase()}).join(", ")+". "+o.note+".";
+ var feed=open.filter(function(l){return o.takes.indexOf(l.cat)>-1}).sort(function(a,b){return a.exp-b.exp});
+ $("feed").innerHTML=feed.length?feed.map(function(l){var t=left(l.exp);
+  return '<div class="item"><div><h3>'+esc(l.item)+'</h3><div class="meta">'+tag(l.cat)+l.qty+' servings · '+km(dist(l.area,o.area))+' · from '+esc(l.who)+'</div><div class="left'+(t[1]?' urgent':'')+'">'+t[0]+'</div></div><button class="btn" data-id="'+l.id+'">Claim pickup</button></div>'}).join(""):'<p class="empty">No open listings match what you take right now. New posts show up here.</p>';
+ var done=S.listings.filter(function(l){return l.status==="claimed"&&l.by===S.org});
+ $("done").innerHTML=done.length?done.map(function(l){return '<div class="item"><div><h3>'+esc(l.item)+'</h3><div class="meta">'+l.qty+' servings · collect from '+esc(l.who)+', '+esc(l.area)+'</div></div><span class="claimed">Claimed</span></div>'}).join(""):'<p class="empty">Claimed pickups appear here.</p>';
+ Array.prototype.forEach.call(document.querySelectorAll("#feed [data-id]"),function(b){b.onclick=function(){claim(b.getAttribute("data-id"))}});
+}
+render();setInterval(render,30000);
+</script>
+</body>
+</html>
